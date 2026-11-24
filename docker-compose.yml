@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: sqlite:////data/app.db
+      JWT_SECRET_KEY: baggage360-local-dev-secret-change-in-production
+      DEBUG: "true"
+      RATE_LIMIT_ENABLED: "true"
+      CORS_ORIGINS: http://localhost:80
+    volumes:
+      - backend-data:/data
+    ports:
+      - "9000:9000"
+    # x-preview-port marker for preview environment
+    x-preview-port: 9000
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    # x-preview-port marker for preview environment
+    x-preview-port: 80
+
+volumes:
+  backend-data:
