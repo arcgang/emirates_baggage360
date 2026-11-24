@@ -1,0 +1,33 @@
+version: '3.8'
+
+# PostgreSQL override for production-like deployments
+# Usage: docker compose -f docker-compose.yml -f docker-compose.postgres.yml up
+
+services:
+  database:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: baggage360
+      POSTGRES_USER: baggage360
+      POSTGRES_PASSWORD: baggage360-dev-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_SPEC: ".[postgres]"
+    environment:
+      DATABASE_URL: postgresql+psycopg://baggage360:baggage360-dev-password@database:5432/baggage360
+      JWT_SECRET_KEY: baggage360-local-dev-secret-change-in-production
+      DEBUG: "true"
+      RATE_LIMIT_ENABLED: "true"
+      CORS_ORIGINS: http://localhost:80
+    depends_on:
+      - database
+
+volumes:
+  postgres-data:
